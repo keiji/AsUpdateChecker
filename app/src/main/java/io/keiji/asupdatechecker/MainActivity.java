@@ -1,16 +1,15 @@
 package io.keiji.asupdatechecker;
 
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +18,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import io.keiji.asupdatechecker.service.CheckService;
 
@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     = PreferenceUtils.checkUpdate(mSharedPreferences, data);
 
             if (updatedChannelList.size() > 0) {
-
                 mState.setText("新しいAndroid Studioがリリースされました！\n");
 
                 for (UpdateState.Product.Channel channel : updatedChannelList) {
@@ -71,15 +70,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             channel.status, build.version, build.number));
                 }
 
-                ////
-
                 CheckService.showNotification(getApplicationContext(), updatedChannelList);
 
-                ////
-
                 PreferenceUtils.save(mSharedPreferences, data);
+
             } else {
                 mState.setText("アップデートはありません\n");
+
+                Map<String, UpdateState.Product.Channel> channelList = data
+                        .products.get(data.products.keySet().iterator().next())
+                        .channels;
+
+                for (UpdateState.Product.Channel channel : channelList.values()) {
+                    UpdateState.Product.Channel.Build build = channel.builds.get(0);
+                    mState.append(String.format(Locale.US, "%s - %s:%s\n",
+                            channel.status, build.version, build.number));
+                }
             }
         }
 
@@ -98,6 +104,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar ab = getSupportActionBar();
+        ab.setIcon(R.mipmap.ic_launcher);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 

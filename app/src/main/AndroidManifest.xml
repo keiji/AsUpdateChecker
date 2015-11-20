@@ -21,7 +21,13 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".receiver.BootCompletedReceiver"/>
+        <receiver android:name=".receiver.BootCompletedReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".service.CheckService"
