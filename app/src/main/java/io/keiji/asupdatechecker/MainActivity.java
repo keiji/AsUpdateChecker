@@ -1,10 +1,13 @@
 package io.keiji.asupdatechecker;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +19,8 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+
+import io.keiji.asupdatechecker.service.CheckService;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -66,6 +71,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             channel.status, build.version, build.number));
                 }
 
+                ////
+
+                CheckService.showNotification(getApplicationContext(), updatedChannelList);
+
+                ////
+
                 PreferenceUtils.save(mSharedPreferences, data);
             } else {
                 mState.setText("アップデートはありません\n");
@@ -93,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mState = (TextView) findViewById(R.id.tv_state);
         mCheckUpdate = (Button) findViewById(R.id.btn_check);
         mCheckUpdate.setOnClickListener(this);
+
+        CheckService.setNextTimer(getApplicationContext());
     }
 
     @Override
