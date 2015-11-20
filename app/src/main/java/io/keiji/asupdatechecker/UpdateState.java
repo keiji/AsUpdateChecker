@@ -44,7 +44,7 @@ public class UpdateState {
                 .newDocumentBuilder()
                 .parse(is);
         Element rootNode = document.getDocumentElement();
-        NodeList productList = rootNode.getChildNodes();
+        NodeList productList = rootNode.getElementsByTagName("product");
 
         for (int i = 0; i < productList.getLength(); i++) {
             Node productNode = productList.item(i);
@@ -68,7 +68,7 @@ public class UpdateState {
 
             name = element.getAttribute("name");
 
-            NodeList channelList = node.getChildNodes();
+            NodeList channelList = element.getElementsByTagName("channel");
             for (int i = 0; i < channelList.getLength(); i++) {
                 Node channelNode = channelList.item(i);
                 Channel channel = new Channel(channelNode);
@@ -90,7 +90,7 @@ public class UpdateState {
 
                 status = element.getAttribute("status");
 
-                NodeList buildList = node.getChildNodes();
+                NodeList buildList = element.getElementsByTagName("build");
                 for (int i = 0; i < buildList.getLength(); i++) {
                     Node buildNode = buildList.item(i);
                     Build build = new Build(buildNode);
