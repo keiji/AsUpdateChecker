@@ -2,9 +2,7 @@ package io.keiji.asupdatechecker;
 
 import android.util.Log;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -15,9 +13,7 @@ public class Endpoint {
 
     private static final String ENDPOINT_URL = "https://dl.google.com/android/studio/patches/updates.xml";
 
-    public static final String getUpdateState() throws IOException {
-        StringBuffer sb = new StringBuffer();
-
+    public static final UpdateState getUpdateState() throws IOException {
         HttpsURLConnection httpsURLConnection = null;
 
         try {
@@ -25,12 +21,7 @@ public class Endpoint {
             httpsURLConnection = (HttpsURLConnection) url.openConnection();
             httpsURLConnection.connect();
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
-
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
+            return UpdateState.parse(httpsURLConnection.getInputStream());
         } catch (MalformedURLException e) {
             Log.e(TAG, "MalformedURLException", e);
 
@@ -39,6 +30,6 @@ public class Endpoint {
                 httpsURLConnection.disconnect();
             }
         }
-        return sb.toString();
+        return null;
     }
 }

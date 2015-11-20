@@ -19,15 +19,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int LOADER_ID = 0x01;
 
-    public static class CHeckUpdateLoader extends AsyncTaskLoader<String> {
+    public static class CHeckUpdateLoader extends AsyncTaskLoader<UpdateState> {
 
         public CHeckUpdateLoader(Context context) {
             super(context);
         }
 
         @Override
-        public String loadInBackground() {
-            String result = null;
+        public UpdateState loadInBackground() {
+            UpdateState result = null;
             try {
                 result = Endpoint.getUpdateState();
             } catch (IOException e) {
@@ -38,22 +38,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private final LoaderManager.LoaderCallbacks<String> mLoaderCallback = new LoaderManager.LoaderCallbacks<String>() {
+    private final LoaderManager.LoaderCallbacks<UpdateState> mLoaderCallback = new LoaderManager.LoaderCallbacks<UpdateState>() {
         @Override
-        public Loader<String> onCreateLoader(int id, Bundle args) {
+        public Loader<UpdateState> onCreateLoader(int id, Bundle args) {
             CHeckUpdateLoader loader = new CHeckUpdateLoader(MainActivity.this);
             loader.forceLoad();
             return loader;
         }
 
         @Override
-        public void onLoadFinished(Loader<String> loader, String data) {
-            mState.setText(data);
-
+        public void onLoadFinished(Loader<UpdateState> loader, UpdateState data) {
+            mState.setText(data.products.get(data.products.keySet().iterator().next())
+                    .channels.get("release")
+                    .builds.get(0)
+                    .version);
         }
 
         @Override
-        public void onLoaderReset(Loader<String> loader) {
+        public void onLoaderReset(Loader<UpdateState> loader) {
 
         }
     };
