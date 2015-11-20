@@ -24,8 +24,7 @@ public class PreferenceUtils {
 
             UpdateState.Product.Channel.Build build = channel.builds.get(0);
 
-            if (true) {
-//            if (!build.version.equals(version) || !build.number.equals(number)) {
+            if (/* BuildConfig.DEBUG || */ !build.version.equals(version) || !build.number.equals(number)) {
                 updatedChannel.add(channel);
             }
         }

@@ -92,7 +92,11 @@ public class CheckService extends IntentService {
 
     public static void showNotification(Context context, List<UpdateState.Product.Channel> updatedChannelList) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setContentTitle("New Android Studio")
+                .setContentText("New Android Studio version available")
                 .setTicker("New Android Studio version available")
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setDefaults(Notification.DEFAULT_VIBRATE);
 
@@ -101,7 +105,7 @@ public class CheckService extends IntentService {
 
         for (UpdateState.Product.Channel channel : updatedChannelList) {
             UpdateState.Product.Channel.Build build = channel.builds.get(0);
-            inboxStyle.addLine(String.format(Locale.US, "%s - %s\n",
+            inboxStyle.addLine(String.format(Locale.US, "%s in %s channel.\n",
                     build.version, channel.status));
         }
 
