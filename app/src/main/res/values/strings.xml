@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Android Studio Update</string>
+    <string name="app_name">Update Checker</string>
+    <string name="app_name_long">Android Studio Update Checker</string>
 </resources>

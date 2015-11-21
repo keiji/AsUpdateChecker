@@ -25,9 +25,9 @@ import io.keiji.asupdatechecker.UpdateState;
 public class CheckService extends IntentService {
     private static final String TAG = CheckService.class.getSimpleName();
 
-    public static final int REQUEST_CODE = 0x01;
+    private static final String DEFAULT_INTERVAL = String.valueOf(6 * 60 * 60);
 
-    private static final long INTERVAL_MILLISEC = 1 * 60 * 60 * 1000;
+    public static final int REQUEST_CODE = 0x01;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, CheckService.class);
@@ -39,6 +39,7 @@ public class CheckService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.d(TAG, "starting Update Check...");
 
         SharedPreferences sharedPreferences
                 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -80,14 +81,22 @@ public class CheckService extends IntentService {
     }
 
     public static void setNextTimer(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        String intervalString = sharedPreferences.getString("auto_check_interval", DEFAULT_INTERVAL);
+        long interval = Long.parseLong(intervalString) * 1000;
+
         Intent service = CheckService.newIntent(context);
         PendingIntent pendingIntent = PendingIntent.getService(context,
                 CheckService.REQUEST_CODE, service, 0x0);
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
         am.cancel(pendingIntent);
 
-        am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + INTERVAL_MILLISEC, pendingIntent);
+        if (sharedPreferences.getBoolean("auto_check", false)) {
+            am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, pendingIntent);
+        }
     }
 
     public static void showNotification(Context context, List<UpdateState.Product.Channel> updatedChannelList) {

@@ -46,6 +46,7 @@ public class PreferenceUtils {
             editor.putString(channel.status + KEY_NUMBER, build.number);
         }
 
-        editor.apply();
+        editor.putLong("last_update", System.currentTimeMillis())
+                .apply();
     }
 }

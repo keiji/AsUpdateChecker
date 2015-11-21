@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="設定">
+
+        <Preference android:key="status"/>
+
+        <Preference
+            android:key="check_update_immediately"
+            android:title="今すぐ確認"
+            />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="auto_check"
+            android:title="定期的に確認"
+            />
+
+        <ListPreference
+            android:defaultValue="21600"
+            android:dependency="auto_check"
+            android:entries="@array/interval_entries"
+            android:entryValues="@array/interval_values_in_seconds"
+            android:key="auto_check_interval"
+            android:title="間隔"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="アプリについて">
+        <Preference
+            android:key="version"
+            android:title="@string/app_name_long"
+            />
+    </PreferenceCategory>
+
+</PreferenceScreen>
