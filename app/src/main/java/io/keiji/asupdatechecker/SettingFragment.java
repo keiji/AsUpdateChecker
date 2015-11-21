@@ -129,6 +129,16 @@ public class SettingFragment extends PreferenceFragmentCompat implements Prefere
                 });
         findPreference("auto_check").setOnPreferenceChangeListener(this);
 
+        findPreference("license").setOnPreferenceClickListener(
+                new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        LicenseDialogFragment.newInstance().show(getFragmentManager(),
+                                LicenseDialogFragment.class.getSimpleName());
+                        return true;
+                    }
+                });
+
         long lastUpdate = mSharedPreferences.getLong("last_update", -1);
         if (lastUpdate < 0) {
             checkUpdate();

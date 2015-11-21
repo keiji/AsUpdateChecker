@@ -29,10 +29,17 @@
 
     <PreferenceCategory
         android:title="アプリについて">
+
         <Preference
             android:key="version"
             android:title="@string/app_name_long"
             />
+
+        <Preference
+            android:key="license"
+            android:title="Open Source License"
+            />
+
     </PreferenceCategory>
 
 </PreferenceScreen>
