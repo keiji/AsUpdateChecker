@@ -35,38 +35,43 @@ public class SettingFragment extends PreferenceFragment {
         return new SettingFragment();
     }
 
-    public static class CHeckUpdateLoader extends AsyncTaskLoader<UpdateState> {
+    public static class CHeckUpdateLoader extends AsyncTaskLoader<EndpointResult> {
 
         public CHeckUpdateLoader(Context context) {
             super(context);
         }
 
         @Override
-        public UpdateState loadInBackground() {
-            UpdateState result = null;
+        public EndpointResult loadInBackground() {
+            EndpointResult result = null;
             try {
-                result = Endpoint.getUpdateState();
+                result = new EndpointResult(Endpoint.getUpdateState());
             } catch (IOException e) {
                 Log.e(TAG, "IOException", e);
+                result = new EndpointResult(e);
             }
 
             return result;
         }
     }
 
-    private final LoaderManager.LoaderCallbacks<UpdateState> mLoaderCallback = new LoaderManager.LoaderCallbacks<UpdateState>() {
+    private final LoaderManager.LoaderCallbacks<EndpointResult> mLoaderCallback = new LoaderManager.LoaderCallbacks<EndpointResult>() {
         @Override
-        public Loader<UpdateState> onCreateLoader(int id, Bundle args) {
+        public Loader<EndpointResult> onCreateLoader(int id, Bundle args) {
             CHeckUpdateLoader loader = new CHeckUpdateLoader(getActivity());
             loader.forceLoad();
             return loader;
         }
 
         @Override
-        public void onLoadFinished(Loader<UpdateState> loader, UpdateState data) {
+        public void onLoadFinished(Loader<EndpointResult> loader, EndpointResult data) {
+            if (data.exception != null) {
+                mStatus.setTitle(data.exception.getMessage());
+                return;
+            }
 
             List<UpdateState.Product.Channel> updatedChannelList
-                    = PreferenceUtils.checkUpdate(mSharedPreferences, data);
+                    = PreferenceUtils.checkUpdate(mSharedPreferences, data.updateState);
 
             Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
             calendar.setTimeInMillis(System.currentTimeMillis());
@@ -85,8 +90,8 @@ public class SettingFragment extends PreferenceFragment {
 
                 CheckService.showNotification(getActivity(), updatedChannelList);
             } else {
-                Map<String, UpdateState.Product.Channel> channelList = data
-                        .products.get(data.products.keySet().iterator().next())
+                Map<String, UpdateState.Product.Channel> channelList = data.updateState
+                        .products.get(data.updateState.products.keySet().iterator().next())
                         .channels;
 
                 StringBuffer sb = new StringBuffer();
@@ -100,11 +105,11 @@ public class SettingFragment extends PreferenceFragment {
                 mStatus.setSummary(sb.toString());
             }
 
-            PreferenceUtils.save(mSharedPreferences, data);
+            PreferenceUtils.save(mSharedPreferences, data.updateState);
         }
 
         @Override
-        public void onLoaderReset(Loader<UpdateState> loader) {
+        public void onLoaderReset(Loader<EndpointResult> loader) {
 
         }
     };
