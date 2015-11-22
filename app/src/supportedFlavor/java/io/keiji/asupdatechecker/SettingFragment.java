@@ -14,10 +14,10 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 
 import io.keiji.asupdatechecker.service.CheckService;
@@ -79,31 +79,25 @@ public class SettingFragment extends PreferenceFragmentCompat {
 
             String format = getContext().getString(R.string.state_format);
 
-            if (updatedChannelList.size() > 0) {
-                StringBuffer sb = new StringBuffer();
-                for (UpdateState.Product.Channel channel : updatedChannelList) {
-                    UpdateState.Product.Channel.Build build = channel.builds.get(0);
-                    sb.append(String.format(Locale.US, format, channel.status, build.version))
-                            .append('\n');
-                }
-                mStatus.setSummary(sb.toString());
+            StringBuffer sb = new StringBuffer();
 
+            if (updatedChannelList.size() > 0) {
                 CheckService.showNotification(getContext(), updatedChannelList);
             } else {
-                Map<String, UpdateState.Product.Channel> channelList = data.updateState
+                updatedChannelList = new ArrayList<>(data.updateState
                         .products.get(data.updateState.products.keySet().iterator().next())
-                        .channels;
-
-                StringBuffer sb = new StringBuffer();
-
-                for (UpdateState.Product.Channel channel : channelList.values()) {
-                    UpdateState.Product.Channel.Build build = channel.builds.get(0);
-                    sb.append(String.format(Locale.US, format, channel.status, build.version))
-                            .append('\n');
-                }
-                sb.delete(sb.length() - 1, sb.length());
-                mStatus.setSummary(sb.toString());
+                        .channels.values());
             }
+
+            for (UpdateState.Product.Channel channel : updatedChannelList) {
+                UpdateState.Product.Channel.Build build = channel.builds.get(0);
+                sb.append(String.format(Locale.US, format, build.version, channel.status))
+                        .append('\n');
+            }
+
+            sb.delete(sb.length() - 1, sb.length());
+
+            mStatus.setSummary(sb.toString());
 
             PreferenceUtils.save(mSharedPreferences, data.updateState);
         }
