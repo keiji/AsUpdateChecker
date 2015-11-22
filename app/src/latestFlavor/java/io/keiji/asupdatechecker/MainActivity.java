@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
         getFragmentManager()
                 .beginTransaction()
-                .add(R.id.content, SettingFragment.newInstance(), SettingFragment.class.getSimpleName())
+                .replace(R.id.content, SettingFragment.newInstance(), SettingFragment.class.getSimpleName())
                 .commit();
     }
 }
