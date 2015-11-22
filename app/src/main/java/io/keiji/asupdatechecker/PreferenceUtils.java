@@ -1,6 +1,7 @@
 package io.keiji.asupdatechecker;
 
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,6 @@ public class PreferenceUtils {
         }
 
         editor.putLong("last_update", System.currentTimeMillis())
-                .apply();
+                .commit();
     }
 }

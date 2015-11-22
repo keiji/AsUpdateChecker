@@ -13,7 +13,7 @@ public class Endpoint {
 
     private static final String ENDPOINT_URL = "https://dl.google.com/android/studio/patches/updates.xml";
 
-    public static final UpdateState getUpdateState() throws IOException {
+    public static UpdateState getUpdateState() throws IOException {
         HttpsURLConnection httpsURLConnection = null;
 
         try {

@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 public class MainActivity extends AppCompatActivity {
+    public static final int REQUEST_CODE = 0x1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,5 +24,4 @@ public class MainActivity extends AppCompatActivity {
                 .add(R.id.content, SettingFragment.newInstance(), SettingFragment.class.getSimpleName())
                 .commit();
     }
-
 }

@@ -18,12 +18,15 @@ import java.util.List;
 import java.util.Locale;
 
 import io.keiji.asupdatechecker.Endpoint;
+import io.keiji.asupdatechecker.MainActivity;
 import io.keiji.asupdatechecker.PreferenceUtils;
 import io.keiji.asupdatechecker.R;
 import io.keiji.asupdatechecker.UpdateState;
 
 public class CheckService extends IntentService {
     private static final String TAG = CheckService.class.getSimpleName();
+
+    private static final int NOTIFICATION_ID = 0x01;
 
     private static final String DEFAULT_INTERVAL = String.valueOf(6 * 60 * 60);
 
@@ -51,26 +54,10 @@ public class CheckService extends IntentService {
                     = PreferenceUtils.checkUpdate(sharedPreferences, data);
 
             if (updatedChannelList.size() > 0) {
-
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                        .setTicker("新しいAndroid Studioがリリースされました")
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setDefaults(Notification.DEFAULT_VIBRATE);
-
-                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
-                inboxStyle.setBigContentTitle("新しいAndroid Studioがリリースされました");
-
-                for (UpdateState.Product.Channel channel : updatedChannelList) {
-                    UpdateState.Product.Channel.Build build = channel.builds.get(0);
-                    inboxStyle.addLine(String.format(Locale.US, "%s - %s:%s\n",
-                            channel.status, build.version, build.number));
-                }
-
-                NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                nm.notify(0x01, builder.build());
-
-                PreferenceUtils.save(sharedPreferences, data);
+                showNotification(getApplicationContext(), updatedChannelList);
             }
+
+            PreferenceUtils.save(sharedPreferences, data);
 
         } catch (IOException e) {
             Log.e(TAG, "IOException", e);
@@ -82,9 +69,19 @@ public class CheckService extends IntentService {
 
     public static void setNextTimer(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        setNextTimer(context, sharedPreferences.getBoolean("auto_check", false));
+    }
 
+    public static void setNextTimer(Context context, boolean autoCheck) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String intervalString = sharedPreferences.getString("auto_check_interval", DEFAULT_INTERVAL);
+        setNextTimer(context, autoCheck, intervalString);
+    }
+
+    public static void setNextTimer(Context context, boolean autoCheck, String intervalString) {
         long interval = Long.parseLong(intervalString) * 1000;
+
+        Log.d(TAG, "try set Update Check..." + interval / 1000);
 
         Intent service = CheckService.newIntent(context);
         PendingIntent pendingIntent = PendingIntent.getService(context,
@@ -94,31 +91,42 @@ public class CheckService extends IntentService {
 
         am.cancel(pendingIntent);
 
-        if (sharedPreferences.getBoolean("auto_check", false)) {
-            am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + interval, pendingIntent);
+        if (autoCheck) {
+            am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + interval, pendingIntent);
+
+            Log.d(TAG, "set Update Check..." + SystemClock.elapsedRealtime() + interval);
+
         }
     }
 
     public static void showNotification(Context context, List<UpdateState.Product.Channel> updatedChannelList) {
+
+        Intent intent = new Intent(context, MainActivity.class);
+        PendingIntent activity = PendingIntent.getActivity(
+                context, MainActivity.REQUEST_CODE, intent, 0x0);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setContentTitle("New Android Studio")
-                .setContentText("New Android Studio version available")
-                .setTicker("New Android Studio version available")
+                .setContentTitle(context.getText(R.string.new_android_studio))
+                .setContentText(context.getText(R.string.new_android_studio_version_available))
+                .setTicker(context.getText(R.string.new_android_studio_version_available))
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setDefaults(Notification.DEFAULT_VIBRATE);
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setContentIntent(activity);
 
-        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
-        inboxStyle.setBigContentTitle("New Android Studio version available");
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder)
+                .setBigContentTitle(context.getText(R.string.new_android_studio_version_available));
 
+        String format = context.getString(R.string.state_format);
         for (UpdateState.Product.Channel channel : updatedChannelList) {
             UpdateState.Product.Channel.Build build = channel.builds.get(0);
-            inboxStyle.addLine(String.format(Locale.US, "%s in %s channel.\n",
+            inboxStyle.addLine(String.format(Locale.US, format,
                     build.version, channel.status));
         }
 
         NotificationManager nm = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(0x01, builder.build());
+        nm.notify(NOTIFICATION_ID, builder.build());
     }
 }

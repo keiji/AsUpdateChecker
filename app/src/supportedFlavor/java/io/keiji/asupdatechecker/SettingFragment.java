@@ -3,12 +3,13 @@ package io.keiji.asupdatechecker;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ import java.util.TimeZone;
 
 import io.keiji.asupdatechecker.service.CheckService;
 
-public class SettingFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class SettingFragment extends PreferenceFragmentCompat {
     private static final String TAG = SettingFragment.class.getSimpleName();
 
     private static final int LOADER_ID = 0x01;
@@ -68,34 +69,37 @@ public class SettingFragment extends PreferenceFragmentCompat implements Prefere
 
             Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
             calendar.setTimeInMillis(System.currentTimeMillis());
-            mStatus.setTitle("最終確認 " + FORMATTER.format(calendar.getTime()));
+            mStatus.setTitle(getText(R.string.last_check_at) + " " + FORMATTER.format(calendar.getTime()));
+
+            String format = getContext().getString(R.string.state_format);
 
             if (updatedChannelList.size() > 0) {
                 StringBuffer sb = new StringBuffer();
                 for (UpdateState.Product.Channel channel : updatedChannelList) {
                     UpdateState.Product.Channel.Build build = channel.builds.get(0);
-                    sb.append(String.format(Locale.US, "%s - %s:%s\n",
-                            channel.status, build.version, build.number));
+                    sb.append(String.format(Locale.US, format, channel.status, build.version))
+                            .append('\n');
                 }
                 mStatus.setSummary(sb.toString());
 
                 CheckService.showNotification(getContext(), updatedChannelList);
-
-                PreferenceUtils.save(mSharedPreferences, data);
-
             } else {
                 Map<String, UpdateState.Product.Channel> channelList = data
                         .products.get(data.products.keySet().iterator().next())
                         .channels;
 
                 StringBuffer sb = new StringBuffer();
+
                 for (UpdateState.Product.Channel channel : channelList.values()) {
                     UpdateState.Product.Channel.Build build = channel.builds.get(0);
-                    sb.append(String.format(Locale.US, "%s - %s:%s\n",
-                            channel.status, build.version, build.number));
+                    sb.append(String.format(Locale.US, format, channel.status, build.version))
+                            .append('\n');
                 }
+                sb.delete(sb.length() - 1, sb.length());
                 mStatus.setSummary(sb.toString());
             }
+
+            PreferenceUtils.save(mSharedPreferences, data);
         }
 
         @Override
@@ -115,7 +119,7 @@ public class SettingFragment extends PreferenceFragmentCompat implements Prefere
         addPreferencesFromResource(R.xml.setting);
 
         Preference version = findPreference("version");
-        version.setSummary("Version " + BuildConfig.VERSION_NAME);
+        version.setSummary("Version " + BuildConfig.VERSION_NAME + " " + BuildConfig.FLAVOR);
 
         mStatus = findPreference("status");
 
@@ -127,7 +131,22 @@ public class SettingFragment extends PreferenceFragmentCompat implements Prefere
                         return false;
                     }
                 });
-        findPreference("auto_check").setOnPreferenceChangeListener(this);
+
+        final CheckBoxPreference autoCheck = (CheckBoxPreference) findPreference("auto_check");
+        autoCheck.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+                CheckService.setNextTimer(getContext(), (Boolean) o);
+                return true;
+            }
+        });
+        findPreference("auto_check_interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+                CheckService.setNextTimer(getContext(), autoCheck.isChecked(), (String) o);
+                return true;
+            }
+        });
 
         findPreference("license").setOnPreferenceClickListener(
                 new Preference.OnPreferenceClickListener() {
@@ -150,15 +169,9 @@ public class SettingFragment extends PreferenceFragmentCompat implements Prefere
             int checkedYear = calendar.get(Calendar.YEAR);
 
             SimpleDateFormat formatter = nowYear != checkedYear ? FORMATTER_YEAR : FORMATTER;
-            mStatus.setTitle("最終確認 " + formatter.format(calendar.getTime()));
+            mStatus.setTitle(getText(R.string.last_check_at) + " "
+                    + formatter.format(calendar.getTime()));
         }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     @Override
@@ -167,9 +180,10 @@ public class SettingFragment extends PreferenceFragmentCompat implements Prefere
     }
 
     @Override
-    public boolean onPreferenceChange(Preference preference, Object o) {
-        CheckService.setNextTimer(getContext());
-        return true;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     private void checkUpdate() {
