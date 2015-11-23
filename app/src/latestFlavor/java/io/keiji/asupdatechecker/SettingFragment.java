@@ -1,16 +1,13 @@
 package io.keiji.asupdatechecker;
 
-import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -27,9 +24,6 @@ public class SettingFragment extends PreferenceFragment {
     private static final String TAG = SettingFragment.class.getSimpleName();
 
     private static final int LOADER_ID = 0x01;
-
-    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("MM/dd HH:mm:ss");
-    private static final SimpleDateFormat FORMATTER_YEAR = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     public static SettingFragment newInstance() {
         return new SettingFragment();
@@ -55,7 +49,9 @@ public class SettingFragment extends PreferenceFragment {
         }
     }
 
-    private final LoaderManager.LoaderCallbacks<EndpointResult> mLoaderCallback = new LoaderManager.LoaderCallbacks<EndpointResult>() {
+    private final LoaderManager.LoaderCallbacks<EndpointResult> mLoaderCallback
+            = new LoaderManager.LoaderCallbacks<EndpointResult>() {
+
         @Override
         public Loader<EndpointResult> onCreateLoader(int id, Bundle args) {
             CHeckUpdateLoader loader = new CHeckUpdateLoader(getActivity());
@@ -71,15 +67,16 @@ public class SettingFragment extends PreferenceFragment {
             }
 
             List<UpdateState.Product.Channel> updatedChannelList
-                    = PreferenceUtils.checkUpdate(mSharedPreferences, data.updateState);
+                    = PreferenceUtils.checkUpdate(mSetting, data.updateState);
 
             Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
             calendar.setTimeInMillis(System.currentTimeMillis());
-            mStatus.setTitle(getText(R.string.last_check_at) + " " + FORMATTER.format(calendar.getTime()));
+            mStatus.setTitle(getText(R.string.last_check_at) + " "
+                    + Formatter.MONTH_DAY.format(calendar.getTime()));
 
             String format = getActivity().getString(R.string.state_format);
 
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
             if (updatedChannelList.size() > 0) {
                 CheckService.showNotification(getActivity(), updatedChannelList);
@@ -99,7 +96,7 @@ public class SettingFragment extends PreferenceFragment {
 
             mStatus.setSummary(sb.toString());
 
-            PreferenceUtils.save(mSharedPreferences, data.updateState);
+            PreferenceUtils.save(mSetting, data.updateState);
         }
 
         @Override
@@ -110,7 +107,7 @@ public class SettingFragment extends PreferenceFragment {
 
     private Preference mStatus;
 
-    private SharedPreferences mSharedPreferences;
+    private Setting mSetting;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -157,8 +154,15 @@ public class SettingFragment extends PreferenceFragment {
                         return true;
                     }
                 });
+    }
 
-        long lastUpdate = mSharedPreferences.getLong("last_update", -1);
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        mSetting = Setting.getInstance(getActivity());
+
+        long lastUpdate = mSetting.getLastupdate();
         if (lastUpdate < 0) {
             checkUpdate();
         } else {
@@ -168,18 +172,11 @@ public class SettingFragment extends PreferenceFragment {
             calendar.setTimeInMillis(lastUpdate);
             int checkedYear = calendar.get(Calendar.YEAR);
 
-            SimpleDateFormat formatter = nowYear != checkedYear ? FORMATTER_YEAR : FORMATTER;
+            SimpleDateFormat formatter = nowYear != checkedYear
+                    ? Formatter.YEAR_MONTH_DAY : Formatter.MONTH_DAY;
             mStatus.setTitle(getText(R.string.last_check_at) + " "
                     + formatter.format(calendar.getTime()));
         }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
     }
 
     private void checkUpdate() {

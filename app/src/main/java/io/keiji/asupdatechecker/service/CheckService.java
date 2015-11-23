@@ -7,9 +7,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -21,14 +19,13 @@ import io.keiji.asupdatechecker.Endpoint;
 import io.keiji.asupdatechecker.MainActivity;
 import io.keiji.asupdatechecker.PreferenceUtils;
 import io.keiji.asupdatechecker.R;
+import io.keiji.asupdatechecker.Setting;
 import io.keiji.asupdatechecker.UpdateState;
 
 public class CheckService extends IntentService {
     private static final String TAG = CheckService.class.getSimpleName();
 
     private static final int NOTIFICATION_ID = 0x01;
-
-    private static final String DEFAULT_INTERVAL = String.valueOf(6 * 60 * 60);
 
     public static final int REQUEST_CODE = 0x01;
 
@@ -44,20 +41,19 @@ public class CheckService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "starting Update Check...");
 
-        SharedPreferences sharedPreferences
-                = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Setting setting = Setting.getInstance(getApplicationContext());
 
         try {
             UpdateState data = Endpoint.getUpdateState();
 
             List<UpdateState.Product.Channel> updatedChannelList
-                    = PreferenceUtils.checkUpdate(sharedPreferences, data);
+                    = PreferenceUtils.checkUpdate(setting, data);
 
             if (updatedChannelList.size() > 0) {
                 showNotification(getApplicationContext(), updatedChannelList);
             }
 
-            PreferenceUtils.save(sharedPreferences, data);
+            PreferenceUtils.save(setting, data);
 
         } catch (IOException e) {
             Log.e(TAG, "IOException", e);
@@ -68,14 +64,13 @@ public class CheckService extends IntentService {
     }
 
     public static void setNextTimer(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        setNextTimer(context, sharedPreferences.getBoolean("auto_check", false));
+        Setting setting = Setting.getInstance(context);
+        setNextTimer(context, setting.isAutoCheckEnabled());
     }
 
     public static void setNextTimer(Context context, boolean autoCheck) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String intervalString = sharedPreferences.getString("auto_check_interval", DEFAULT_INTERVAL);
-        setNextTimer(context, autoCheck, intervalString);
+        Setting setting = Setting.getInstance(context);
+        setNextTimer(context, autoCheck, setting.getCheckInterval());
     }
 
     public static void setNextTimer(Context context, boolean autoCheck, String intervalString) {
