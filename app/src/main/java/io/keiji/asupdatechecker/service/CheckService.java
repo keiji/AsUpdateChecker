@@ -96,6 +96,9 @@ public class CheckService extends IntentService {
     }
 
     public static void showNotification(Context context, List<UpdateState.Product.Channel> updatedChannelList) {
+        if (updatedChannelList.size() == 0) {
+            return;
+        }
 
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent activity = PendingIntent.getActivity(
@@ -111,14 +114,22 @@ public class CheckService extends IntentService {
                 .setDefaults(Notification.DEFAULT_VIBRATE)
                 .setContentIntent(activity);
 
-        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder)
-                .setBigContentTitle(context.getText(R.string.new_android_studio_version_available));
-
         String format = context.getString(R.string.state_format);
-        for (UpdateState.Product.Channel channel : updatedChannelList) {
+
+        if (updatedChannelList.size() == 1) {
+            UpdateState.Product.Channel channel = updatedChannelList.get(0);
             UpdateState.Product.Channel.Build build = channel.builds.get(0);
-            inboxStyle.addLine(String.format(Locale.US, format,
+            builder.setContentText(String.format(Locale.US, format,
                     build.version, channel.status));
+        } else {
+            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder)
+                    .setBigContentTitle(context.getText(R.string.new_android_studio_version_available));
+
+            for (UpdateState.Product.Channel channel : updatedChannelList) {
+                UpdateState.Product.Channel.Build build = channel.builds.get(0);
+                inboxStyle.addLine(String.format(Locale.US, format,
+                        build.version, channel.status));
+            }
         }
 
         NotificationManager nm = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
