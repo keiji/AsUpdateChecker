@@ -2,33 +2,33 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="設定">
+        android:title="@string/setting">
 
         <Preference android:key="status"/>
 
         <Preference
             android:key="check_update_immediately"
-            android:title="今すぐ確認"
+            android:title="@string/check_immediately"
             />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="auto_check"
-            android:title="定期的に確認"
+            android:title="@string/auto_check"
             />
 
         <ListPreference
-            android:defaultValue="21600"
+            android:defaultValue="@string/default_interval"
             android:dependency="auto_check"
             android:entries="@array/interval_entries"
             android:entryValues="@array/interval_values_in_seconds"
             android:key="auto_check_interval"
-            android:title="間隔"
+            android:title="@string/interval"
             />
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="アプリについて">
+        android:title="@string/about">
 
         <Preference
             android:key="version"
@@ -37,7 +37,7 @@
 
         <Preference
             android:key="license"
-            android:title="Open Source License"
+            android:title="@string/license"
             />
 
     </PreferenceCategory>

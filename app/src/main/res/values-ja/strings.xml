@@ -1,0 +1,14 @@
+<resources>
+    <string name="setting">設定</string>
+    <string name="check_immediately">今すぐ確認</string>
+    <string name="auto_check">定期的に確認</string>
+    <string name="interval">間隔</string>
+    <string name="about">アプリについて</string>
+    <string name="license">Open Source License</string>
+
+    <string name="new_android_studio_version_available">新しいAndroid Studioが公開されました</string>
+    <string name="new_android_studio">新しいAndroid Studio</string>
+    <string name="last_check_at">最終確認:</string>
+    <string name="state_format" formatted="false">%1$s - %2$sチャンネル</string>
+
+</resources>
