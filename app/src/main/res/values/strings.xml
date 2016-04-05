@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Update Checker</string>
-    <string name="app_name_long">Android Studio Update Checker</string>
+    <string name="app_name" translatable="false">Update Checker</string>
+    <string name="app_name_long" translatable="false">Android Studio Update Checker</string>
 
     <string name="setting">Setting</string>
     <string name="check_immediately">Check Now</string>
@@ -9,7 +9,7 @@
     <string name="about">About</string>
     <string name="license">Open Source License</string>
 
-    <string name="default_interval">21600</string>
+    <string name="default_interval" translatable="false">21600</string>
 
     <string name="new_android_studio_version_available">New Android Studio version available</string>
     <string name="new_android_studio">New Android Studio</string>

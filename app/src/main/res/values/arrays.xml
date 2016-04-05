@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="interval_entries">
-        <item>15分</item>
-        <item>1時間</item>
-        <item>3時間</item>
-        <item>6時間</item>
-        <item>12時間</item>
+        <item>15 Min</item>
+        <item>An Hour</item>
+        <item>3 Hours</item>
+        <item>6 Hours</item>
+        <item>12 Hours</item>
     </string-array>
 
-    <string-array name="interval_values_in_seconds">
+
+    <string-array name="interval_values_in_seconds" translatable="false">
         <item>900</item>
         <item>3600</item>
         <item>10800</item>
