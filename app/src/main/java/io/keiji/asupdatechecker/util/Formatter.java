@@ -1,4 +1,4 @@
-package io.keiji.asupdatechecker;
+package io.keiji.asupdatechecker.util;
 
 import java.text.SimpleDateFormat;
 

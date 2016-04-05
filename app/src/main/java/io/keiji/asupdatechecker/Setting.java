@@ -2,7 +2,7 @@ package io.keiji.asupdatechecker;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v7.preference.PreferenceManager;
+import android.preference.PreferenceManager;
 
 public class Setting {
 
@@ -25,17 +25,17 @@ public class Setting {
 
         mSharedPreferences
                 .edit()
-                .putString(channel.status + KEY_VERSION, build.version)
-                .putString(channel.status + KEY_NUMBER, build.number)
+                .putString(channel.id + KEY_VERSION, build.version)
+                .putString(channel.id + KEY_NUMBER, build.number)
                 .commit();
     }
 
     public String getVersion(UpdateState.Product.Channel channel) {
-        return mSharedPreferences.getString(channel.status + KEY_VERSION, "");
+        return mSharedPreferences.getString(channel.id + KEY_VERSION, "");
     }
 
     public String getNumber(UpdateState.Product.Channel channel) {
-        return mSharedPreferences.getString(channel.status + KEY_NUMBER, "");
+        return mSharedPreferences.getString(channel.id + KEY_NUMBER, "");
     }
 
     public void updateLastupdate() {

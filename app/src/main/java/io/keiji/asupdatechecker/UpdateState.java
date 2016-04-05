@@ -11,9 +11,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -21,7 +19,7 @@ import javax.xml.parsers.ParserConfigurationException;
 public class UpdateState {
     private static final String TAG = UpdateState.class.getSimpleName();
 
-    public final Map<String, Product> products = new HashMap<>();
+    public final List<Product> products = new ArrayList<>();
 
     public static UpdateState parse(InputStream is) {
 
@@ -48,8 +46,7 @@ public class UpdateState {
 
         for (int i = 0; i < productList.getLength(); i++) {
             Node productNode = productList.item(i);
-            Product product = new Product(productNode);
-            products.put(product.name, product);
+            products.add(new Product(productNode));
         }
     }
 
@@ -57,7 +54,7 @@ public class UpdateState {
 
         public final String name;
 
-        public final Map<String, Channel> channels = new HashMap<>();
+        public final List<Channel> channels = new ArrayList<>();
 
         private Product(Node node) {
             if (node.getNodeType() != Node.ELEMENT_NODE) {
@@ -71,30 +68,41 @@ public class UpdateState {
             NodeList channelList = element.getElementsByTagName("channel");
             for (int i = 0; i < channelList.getLength(); i++) {
                 Node channelNode = channelList.item(i);
-                Channel channel = new Channel(channelNode);
-                channels.put(channel.status, channel);
+                channels.add(new Channel(channelNode));
             }
         }
 
         public static class Channel {
 
+            public final String id;
+            public final int majorVersion;
             public final String status;
             public final List<Build> builds = new ArrayList<>();
 
             private Channel(Node node) {
                 if (node.getNodeType() != Node.ELEMENT_NODE) {
+                    id = null;
+                    majorVersion = -1;
                     status = null;
                     return;
                 }
                 Element element = (Element) node;
 
+                id = element.getAttribute("id");
+
+                int version = -1;
+                try {
+                    version = Integer.parseInt(element.getAttribute("majorVersion"));
+                } catch (NumberFormatException e) {
+                }
+
+                majorVersion = version;
                 status = element.getAttribute("status");
 
                 NodeList buildList = element.getElementsByTagName("build");
                 for (int i = 0; i < buildList.getLength(); i++) {
                     Node buildNode = buildList.item(i);
-                    Build build = new Build(buildNode);
-                    builds.add(build);
+                    builds.add(new Build(buildNode));
                 }
 
             }

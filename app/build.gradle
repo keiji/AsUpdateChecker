@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+apply plugin: 'realm-android'
+
 def gitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }
@@ -10,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "io.keiji.asupdatechecker"
-        minSdkVersion 11
+        minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -38,13 +40,6 @@ android {
         }
     }
 
-    productFlavors {
-        supportedFlavor {
-            minSdkVersion 7
-        }
-        latestFlavor {
-        }
-    }
     lintOptions {
         abortOnError false
     }
@@ -67,7 +62,6 @@ if (project.hasProperty('keyPassword')) {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
-    compile 'com.android.support:preference-v7:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:design:23.2.1'
 }

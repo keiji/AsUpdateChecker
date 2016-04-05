@@ -9,6 +9,4 @@
     <string name="new_android_studio_version_available">新しいAndroid Studioが公開されました</string>
     <string name="new_android_studio">新しいAndroid Studio</string>
     <string name="last_check_at">最終確認:</string>
-    <string name="state_format" formatted="false">%1$s - %2$sチャンネル</string>
-
 </resources>

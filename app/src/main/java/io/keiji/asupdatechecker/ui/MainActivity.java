@@ -1,9 +1,10 @@
-package io.keiji.asupdatechecker;
+package io.keiji.asupdatechecker.ui;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+
+import io.keiji.asupdatechecker.R;
 
 public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 0x1;
@@ -16,12 +17,11 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ActionBar ab = getSupportActionBar();
-        ab.setIcon(R.mipmap.ic_launcher);
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.content, SettingFragment.newInstance(), SettingFragment.class.getSimpleName())
-                .commit();
+        if (savedInstanceState == null) {
+            getFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.content, SettingFragment.newInstance(), SettingFragment.class.getSimpleName())
+                    .commit();
+        }
     }
 }
