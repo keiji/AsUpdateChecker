@@ -29,6 +29,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+            versionNameSuffix ' (' + gitSha() + ')'
+        }
+        staging.initWith(buildTypes.debug)
+        staging {
+            applicationIdSuffix ".staging"
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -36,9 +46,6 @@ android {
             if (project.hasProperty('storeFile')) {
                 signingConfig signingConfigs.release
             }
-        }
-        debug {
-            versionNameSuffix ' (' + gitSha() + ')'
         }
     }
 
