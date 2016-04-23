@@ -90,45 +90,42 @@ public class CheckService extends Service {
         mExecutorService.shutdown();
     }
 
-    private final Runnable mCheckRunnable = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "starting Update Check...");
+    private final Runnable mCheckRunnable = () -> {
+        Log.d(TAG, "starting Update Check...");
 
-            Endpoint.EndpointResult result = Endpoint.getUpdateState();
+        Endpoint.EndpointResult result = Endpoint.getUpdateState();
 
-            if (result.updateState == null) {
-                return;
-            }
-
-            Realm realm = Realm.getDefaultInstance();
-
-            boolean updated = Stream.of(result.updateState.products)
-                    .flatMap(product -> Stream.of(product.channels))
-                    .flatMap(channel -> Stream.of(channel.builds))
-                    .filter(build -> realm.where(Build.class)
-                            .equalTo("channelId", build.channelId)
-                            .equalTo("number", build.number)
-                            .equalTo("version", build.version)
-                            .count() == 0)
-                    .count() != 0;
-
-            if (updated) {
-                saveUpdateState(realm, result.updateState);
-
-                io.keiji.asupdatechecker.entity.UpdateState latestUpdateState
-                        = realm.where(io.keiji.asupdatechecker.entity.UpdateState.class)
-                        .findAllSorted("time", Sort.DESCENDING)
-                        .first();
-                showNotification(CheckService.this, latestUpdateState);
-            }
-
-            realm.close();
-
-            mSetting.updateLastupdate();
-
-            mHandler.post(() -> mCallback.onCheckCompleted());
+        if (result.updateState == null) {
+            return;
         }
+
+        Realm realm = Realm.getDefaultInstance();
+
+        boolean updated = Stream.of(result.updateState.products)
+                .flatMap(product -> Stream.of(product.channels))
+                .flatMap(channel -> Stream.of(channel.builds))
+                .filter(build -> realm.where(Build.class)
+                        .equalTo("channelId", build.channelId)
+                        .equalTo("number", build.number)
+                        .equalTo("version", build.version)
+                        .count() == 0)
+                .count() != 0;
+
+        if (updated) {
+            saveUpdateState(realm, result.updateState);
+
+            io.keiji.asupdatechecker.entity.UpdateState latestUpdateState
+                    = realm.where(io.keiji.asupdatechecker.entity.UpdateState.class)
+                    .findAllSorted("time", Sort.DESCENDING)
+                    .first();
+            showNotification(CheckService.this, latestUpdateState);
+        }
+
+        realm.close();
+
+        mSetting.updateLastupdate();
+
+        mHandler.post(() -> mCallback.onCheckCompleted());
     };
 
     @NonNull

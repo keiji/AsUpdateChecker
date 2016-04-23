@@ -70,41 +70,27 @@ public class SettingFragment extends PreferenceFragment implements CheckService.
         mStatus = findPreference("status");
 
         mCheckUpdateImmediately = findPreference("check_update_immediately");
-        mCheckUpdateImmediately.setOnPreferenceClickListener(
-                new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-                        mService.checkUpdate();
-                        return false;
-                    }
-                });
+        mCheckUpdateImmediately.setOnPreferenceClickListener(preference -> {
+            mService.checkUpdate();
+            return false;
+        });
         mCheckUpdateImmediately.setEnabled(false);
 
-        final CheckBoxPreference autoCheck = (CheckBoxPreference) findPreference("auto_check");
-        autoCheck.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                CheckService.setNextTimer(getActivity(), (Boolean) o);
-                return true;
-            }
+        CheckBoxPreference autoCheck = (CheckBoxPreference) findPreference("auto_check");
+        autoCheck.setOnPreferenceChangeListener((preference, o) -> {
+            CheckService.setNextTimer(getActivity(), (Boolean) o);
+            return true;
         });
-        findPreference("auto_check_interval").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                CheckService.setNextTimer(getActivity(), autoCheck.isChecked(), (String) o);
-                return true;
-            }
+        findPreference("auto_check_interval").setOnPreferenceChangeListener((preference, o) -> {
+            CheckService.setNextTimer(getActivity(), autoCheck.isChecked(), (String) o);
+            return true;
         });
 
-        findPreference("license").setOnPreferenceClickListener(
-                new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-                        LicenseDialogFragment.newInstance().show(getFragmentManager(),
-                                LicenseDialogFragment.class.getSimpleName());
-                        return true;
-                    }
-                });
+        findPreference("license").setOnPreferenceClickListener(preference -> {
+            LicenseDialogFragment.newInstance().show(getFragmentManager(),
+                    LicenseDialogFragment.class.getSimpleName());
+            return true;
+        });
     }
 
     @Override
