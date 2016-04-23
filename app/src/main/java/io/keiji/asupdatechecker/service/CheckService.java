@@ -38,12 +38,7 @@ public class CheckService extends Service {
 
     public static final int REQUEST_CODE = 0x01;
 
-    private final Callback DUMMY_CALLBACK = new Callback() {
-        @Override
-        public void onCheckCompleted() {
-            Log.d(TAG, "onCheckCompleted dummy");
-        }
-    };
+    private final Callback DUMMY_CALLBACK = () -> Log.d(TAG, "onCheckCompleted dummy");
 
     private Callback mCallback = DUMMY_CALLBACK;
 
@@ -56,6 +51,7 @@ public class CheckService extends Service {
         mCallback = callback;
     }
 
+    private final Handler mHandler = new Handler();
 
     public static Intent newIntent(Context context) {
         return new Intent(context, CheckService.class);
@@ -137,12 +133,7 @@ public class CheckService extends Service {
 
             mSetting.updateLastupdate();
 
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mCallback.onCheckCompleted();
-                }
-            });
+            mHandler.post(() -> mCallback.onCheckCompleted());
         }
     };
 
@@ -193,8 +184,6 @@ public class CheckService extends Service {
 
         return updatedChannelList;
     }
-
-    private final Handler mHandler = new Handler();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

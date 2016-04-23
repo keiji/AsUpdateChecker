@@ -33,6 +33,8 @@ public class LicenseDialogFragment extends DialogFragment {
         AOSP("Android Open Source Project", "licenses/aosp.txt"),
         V7Support("Android v7 Support Libraries", "licenses/aosp.txt"),
         DesignSupport("Android Design Support Library", "licenses/aosp.txt"),
+        StreamApi("Lightweight-Stream-API", "licenses/stream_api.txt"),
+        Retrolambda("Gradle Retrolambda Plugin", "licenses/retrolambda.txt"),
         Realm("Realm Java", "licenses/realm.txt");
 
         public final String name;
