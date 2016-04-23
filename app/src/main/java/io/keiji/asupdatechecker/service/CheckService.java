@@ -15,6 +15,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.annimon.stream.Stream;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -101,23 +103,15 @@ public class CheckService extends Service {
 
             Realm realm = Realm.getDefaultInstance();
 
-            boolean updated = false;
-
-            UPDATED:
-            for (UpdateState.Product product : result.updateState.products) {
-                for (UpdateState.Product.Channel channel : product.channels) {
-                    for (UpdateState.Product.Channel.Build build : channel.builds) {
-                        if (realm.where(Build.class)
-                                .equalTo("channelId", channel.id)
-                                .equalTo("number", build.number)
-                                .equalTo("version", build.version)
-                                .count() == 0) {
-                            updated = true;
-                            break UPDATED;
-                        }
-                    }
-                }
-            }
+            boolean updated = Stream.of(result.updateState.products)
+                    .flatMap(product -> Stream.of(product.channels))
+                    .flatMap(channel -> Stream.of(channel.builds))
+                    .filter(build -> realm.where(Build.class)
+                            .equalTo("channelId", build.channelId)
+                            .equalTo("number", build.number)
+                            .equalTo("version", build.version)
+                            .count() == 0)
+                    .count() != 0;
 
             if (updated) {
                 saveUpdateState(realm, result.updateState);

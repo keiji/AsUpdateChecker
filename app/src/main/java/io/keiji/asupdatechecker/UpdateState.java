@@ -102,17 +102,20 @@ public class UpdateState {
                 NodeList buildList = element.getElementsByTagName("build");
                 for (int i = 0; i < buildList.getLength(); i++) {
                     Node buildNode = buildList.item(i);
-                    builds.add(new Build(buildNode));
+                    builds.add(new Build(id, buildNode));
                 }
 
             }
 
             public static class Build {
 
+                public final String channelId;
                 public final String number;
                 public final String version;
 
-                private Build(Node node) {
+                private Build(String channelId, Node node) {
+                    this.channelId = channelId;
+
                     if (node.getNodeType() != Node.ELEMENT_NODE) {
                         number = null;
                         version = null;
