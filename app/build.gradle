@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 
 apply plugin: 'realm-android'
 
+apply plugin: 'me.tatarka.retrolambda'
+
 def gitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }
@@ -40,6 +42,11 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     lintOptions {
         abortOnError false
     }
@@ -64,4 +71,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:design:23.2.1'
+    compile 'com.annimon:stream:1.0.9'
 }
